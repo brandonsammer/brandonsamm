@@ -1,38 +1,35 @@
-import argparse
-import traceback
+import os
+from dotenv import load_dotenv
 import asyncio
-import re
 import telebot
 from telebot.async_telebot import AsyncTeleBot
 import handlers
-from config import conf, generation_config, safety_settings
+from config import conf
 
-# Init args
-parser = argparse.ArgumentParser()
-parser.add_argument("tg_token", help="telegram token")
-parser.add_argument("GOOGLE_GEMINI_KEY", help="Google Gemini API key")
-options = parser.parse_args()
-print("Arg parse done.")
+load_dotenv()
 
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_API_KEY")
+
+if not TELEGRAM_TOKEN:
+    print("Ошибка: Не найден токен TELEGRAM_BOT_API_KEY. Убедитесь, что вы задали его в переменных окружения.")
+    exit()
 
 async def main():
-    # Init bot
-    bot = AsyncTeleBot(options.tg_token)
+    bot = AsyncTeleBot(TELEGRAM_TOKEN)
     await bot.delete_my_commands(scope=None, language_code=None)
     await bot.set_my_commands(
     commands=[
-        telebot.types.BotCommand("start", "Start"),
-        telebot.types.BotCommand("gemini", f"using {conf['model_1']}"),
-        telebot.types.BotCommand("gemini_pro", f"using {conf['model_2']}"),
-        telebot.types.BotCommand("draw", "draw picture"),
-        telebot.types.BotCommand("edit", "edit photo"),
-        telebot.types.BotCommand("clear", "Clear all history"),
-        telebot.types.BotCommand("switch","switch default model")
+        telebot.types.BotCommand("start", "Start the bot"),
+        telebot.types.BotCommand("gemini", f"Chat using {conf['model_1']}"),
+        telebot.types.BotCommand("gemini_pro", f"Chat using {conf['model_2']}"),
+        telebot.types.BotCommand("draw", "Generate an image"),
+        telebot.types.BotCommand("edit", "Edit a photo"),
+        telebot.types.BotCommand("clear", "Clear chat history"),
+        telebot.types.BotCommand("switch","Switch default model in private chat")
     ],
 )
     print("Bot init done.")
 
-    # Init commands
     bot.register_message_handler(handlers.start,                         commands=['start'],         pass_bot=True)
     bot.register_message_handler(handlers.gemini_stream_handler,         commands=['gemini'],        pass_bot=True)
     bot.register_message_handler(handlers.gemini_pro_stream_handler,     commands=['gemini_pro'],    pass_bot=True)
@@ -47,8 +44,7 @@ async def main():
         content_types=['text'],
         pass_bot=True)
 
-    # Start bot
-    print("Starting Gemini_Telegram_Bot.")
+    print("Starting Gemini_Telegram_Bot...")
     await bot.polling(none_stop=True)
 
 if __name__ == '__main__':
