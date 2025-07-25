@@ -1,38 +1,19 @@
-from google.genai import types
-conf = {
-    "error_info":           "⚠️⚠️⚠️\nSomething went wrong !\nplease try to change your prompt or contact the admin !",
-    "before_generate_info": "🤖Generating🤖",
-    "download_pic_notify":  "🤖Loading picture🤖",
-    "model_1":              "gemini-2.5-flash",
-    "model_2":              "gemini-2.5-pro",
-    "model_3":              "gemini-2.0-flash-preview-image-generation",#for draw
-    "streaming_update_interval": 0.5,  # Streaming answer update interval (seconds)
-}
+import os
+from dotenv import load_dotenv
 
-safety_settings = [
-    types.SafetySetting(
-        category="HARM_CATEGORY_HARASSMENT",
-        threshold="BLOCK_NONE",
-    ),
-    types.SafetySetting(
-        category="HARM_CATEGORY_HATE_SPEECH",
-        threshold="BLOCK_NONE",
-    ),
-    types.SafetySetting(
-        category="HARM_CATEGORY_SEXUALLY_EXPLICIT",
-        threshold="BLOCK_NONE",
-    ),
-    types.SafetySetting(
-        category="HARM_CATEGORY_DANGEROUS_CONTENT",
-        threshold="BLOCK_NONE",
-    ),
-    types.SafetySetting(
-        category="HARM_CATEGORY_CIVIC_INTEGRITY",
-        threshold="BLOCK_NONE",
-    )
-]
+# Загружаем переменные из .env файла
+load_dotenv()
 
-generation_config = types.GenerateContentConfig(
-    response_modalities=['Text', 'Image'],
-    safety_settings=safety_settings,
-)
+# Конфигурация бота
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+# Проверяем наличие обязательных переменных
+if not TELEGRAM_BOT_TOKEN:
+    raise ValueError("TELEGRAM_BOT_TOKEN не найден в переменных окружения")
+
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY не найден в переменных окружения")
+
+# Настройки для логирования
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
